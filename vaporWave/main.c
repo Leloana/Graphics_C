@@ -11,12 +11,15 @@
 
 float timeCounter = 0.0f;
 
+float inclination = 0.5f;
 
-float angleX,angleY = 0.0f;
+float camDistance = 15.0f;
+float camHeight = 10.0f;
 
 float calculateHeight(float x, float z){
 
-	return sin(x * 0.5f + timeCounter) * cos(z * 0.5f) * 1.5f;
+	return sin(x * inclination + timeCounter) * cos(z * inclination) * 1.5f;
+//	return 1;
 }
 void drawTerrain() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -43,6 +46,21 @@ void drawTerrain() {
         }
     }
     glEnd();
+
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camDistance -= yoffset;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		camHeight += 1.0f;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+		camHeight -= 1.0f;
+
 }
 
 int main(void){
@@ -68,12 +86,15 @@ int main(void){
 
 	glMatrixMode(GL_MODELVIEW);
 
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+
 	while(!glfwWindowShouldClose(window)){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glLoadIdentity();
 
 		gluLookAt(
-			   0.0f, 10.0f, 15.0f,
+			   0.0f, camHeight, camDistance,
 			   0.0f, 0.0f, 0.0f,
 			   0.0f, 1.0f, 0.0f
 			  );
