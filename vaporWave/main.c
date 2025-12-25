@@ -1,65 +1,47 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <GL/glu.h>
-#define WIDTH 600
-#define HEIGHT 600
+#include <math.h>
+
+#define WIDTH 1600
+#define HEIGHT 900
+#define MAP_SIZE 400
+#define SCALE 1.0f
+
+
+float timeCounter = 0.0f;
+
 
 float angleX,angleY = 0.0f;
 
+float calculateHeight(float x, float z){
 
-void drawCube() {
-    // FACE DA FRENTE (Z = 1.0) - Vermelha
-    glColor3f(1.0f, 0.0f, 0.0f);
+	return sin(x * 0.5f + timeCounter) * cos(z * 0.5f) * 1.5f;
+}
+void drawTerrain() {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glColor3f(0.0f, 1.0f, 0.5f);
     glBegin(GL_QUADS);
-        glVertex3f(-1.0f, -1.0f,  1.0f); // Inferior Esquerdo
-        glVertex3f( 1.0f, -1.0f,  1.0f); // Inferior Direito
-        glVertex3f( 1.0f,  1.0f,  1.0f); // Superior Direito
-        glVertex3f(-1.0f,  1.0f,  1.0f); // Superior Esquerdo
-    glEnd();
+    for (int x = -MAP_SIZE / 2; x < MAP_SIZE / 2; x++) {
+        for (int z = -MAP_SIZE / 2; z < MAP_SIZE / 2; z++) {
 
-    // FACE DE TRÁS (Z = -1.0) - Verde
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
-        glVertex3f(-1.0f,  1.0f, -1.0f);
-        glVertex3f( 1.0f,  1.0f, -1.0f);
-        glVertex3f( 1.0f, -1.0f, -1.0f);
-    glEnd();
+            // --- Vértice 1 ---
+            float y1 = calculateHeight(x * SCALE, z * SCALE);
+            glVertex3f(x * SCALE, y1, z * SCALE);
 
-    // FACE DA ESQUERDA (X = -1.0) - Azul
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glBegin(GL_QUADS);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
-        glVertex3f(-1.0f, -1.0f,  1.0f);
-        glVertex3f(-1.0f,  1.0f,  1.0f);
-        glVertex3f(-1.0f,  1.0f, -1.0f);
-    glEnd();
+            // --- Vértice 2 ---
+            float y2 = calculateHeight((x + 1) * SCALE, z * SCALE);
+            glVertex3f((x + 1) * SCALE, y2, z * SCALE);
 
-    // FACE DA DIREITA (X = 1.0) - Amarelo
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-        glVertex3f( 1.0f, -1.0f, -1.0f);
-        glVertex3f( 1.0f,  1.0f, -1.0f);
-        glVertex3f( 1.0f,  1.0f,  1.0f);
-        glVertex3f( 1.0f, -1.0f,  1.0f);
-    glEnd();
+            // --- Vértice 3 ---
+            float y3 = calculateHeight((x + 1) * SCALE, (z + 1) * SCALE);
+            glVertex3f((x + 1) * SCALE, y3, (z + 1) * SCALE);
 
-    // FACE DE CIMA (Y = 1.0) - Ciano
-    glColor3f(0.0f, 1.0f, 1.0f);
-    glBegin(GL_QUADS);
-        glVertex3f(-1.0f,  1.0f, -1.0f);
-        glVertex3f(-1.0f,  1.0f,  1.0f);
-        glVertex3f( 1.0f,  1.0f,  1.0f);
-        glVertex3f( 1.0f,  1.0f, -1.0f);
-    glEnd();
-
-    // FACE DE BAIXO (Y = -1.0) - Magenta
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glBegin(GL_QUADS);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
-        glVertex3f( 1.0f, -1.0f, -1.0f);
-        glVertex3f( 1.0f, -1.0f,  1.0f);
-        glVertex3f(-1.0f, -1.0f,  1.0f);
+            // --- Vértice 4 ---
+            float y4 = calculateHeight(x * SCALE, (z + 1) * SCALE);
+            glVertex3f(x * SCALE, y4, (z + 1) * SCALE);
+        }
+    }
     glEnd();
 }
 
@@ -79,8 +61,6 @@ int main(void){
 
 	glfwMakeContextCurrent(window);
 
-	glfwSwapInterval(1);
-	glEnable(GL_DEPTH_TEST);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -93,17 +73,15 @@ int main(void){
 		glLoadIdentity();
 
 		gluLookAt(
-			   0.0f, 0.0f, 5.0f,
+			   0.0f, 10.0f, 15.0f,
 			   0.0f, 0.0f, 0.0f,
 			   0.0f, 1.0f, 0.0f
 			  );
 
-		glRotatef(angleX, 1.0f, 0.0f, 0.0f);
-		glRotatef(angleY, 0.0f, 1.0f, 0.0f);
 
-		drawCube();
-		angleX += 0.01f;
-		angleY += 0.3f;
+		drawTerrain();
+
+		timeCounter += 0.01f;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
